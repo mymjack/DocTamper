@@ -26,7 +26,7 @@ from torch.amp import autocast, GradScaler#need pytorch>1.6
 # from losses import DiceLoss,FocalLoss,SoftCrossEntropyLoss,LovaszLoss
 from fph import FPH
 # import albumentations as A
-from swins import SwinTransformerV2
+from swins import *
 # from albumentations.pytorch import ToTensorV2
 # import torchvision
 import torch.nn.functional as F
@@ -124,10 +124,10 @@ class VPH(nn.Module):
         dp_rates=[x.item() for x in torch.linspace(0, drop_path_rate, sum([3,3]))]  # 2 feature embedding of depth 3
         self.dims = dims
         self.downsample_layers = nn.ModuleList([
-            # nn.Sequential(nn.Conv2d(3, dims[0], kernel_size=4, stride=4),    # Loads vph_imagenet.pt
+            # nn.Sequential(nn.Conv2d(3, dims[0], kernel_size=4, stride=4),    # Loads vph_imagenet.pt but unused as if used, dtd loads also the model structure in vph_imagenet.pt
             nn.Sequential(nn.Conv2d(6, dims[0], kernel_size=4, stride=4),    # Loads weights in dtd_*.pth
                           LayerNorm(dims[0], eps=1e-6, data_format="channels_first")),
-            # nn.Sequential(LayerNorm(dims[1], eps=1e-6, data_format="channels_first"),   # Loads vph_imagenet.pt
+            # nn.Sequential(LayerNorm(dims[1], eps=1e-6, data_format="channels_first"),   # Loads vph_imagenet.pt but unused as dtd loads also the model structure in vph_imagenet.pt
             nn.Sequential(LayerNorm(dims[0], eps=1e-6, data_format="channels_first"),   # Loads weights in dtd_*.pth
                           nn.Conv2d(dims[0], dims[1], kernel_size=2, stride=2))])
         self.stages = nn.ModuleList([
@@ -312,17 +312,18 @@ import torch.nn as nn
 class DTD(SegmentationModel):
     def __init__(self, encoder_name = "resnet18", decoder_channels = (384, 192, 96, 64), classes = 1):
         super().__init__()
-        self.vph = torch.load('weights/vph_imagenet.pt')
-        self.swin = torch.load('weights/swin_imagenet.pt')
-        # # Old gelu has no approximate param (as introduced in pytorch 1.12+), need to replace with new gelu
-        for name, module in self.vph.named_modules():
-            if isinstance(module, nn.GELU):
-                exec('self.vph.' + torchmodify(name) + '=nn.GELU()')
-        for name, module in self.swin.named_modules():
-            if isinstance(module, nn.GELU):
-                exec('self.swin.' + torchmodify(name) + '=nn.GELU()')
-        # self.vph = VPH()
-        # self.swin = SwinTransformerV2(img_size=128, num_heads=[6, 12, 24], depths=[2, 18, 2], embed_dim=192, drop_path=1, drop_path_rate=0.2, pretrained_window_sizes=[8,8,6]).layers
+        # No obvious difference loading the separate vph or swin. The dtd model also have these and perform similarly
+        # self.vph = torch.load('weights/vph_imagenet.pt')
+        # self.swin = torch.load('weights/swin_imagenet.pt')
+        # # # Old gelu has no approximate param (as introduced in pytorch 1.12+), need to replace with new gelu
+        # for name, module in self.vph.named_modules():
+        #     if isinstance(module, nn.GELU):
+        #         exec('self.vph.' + torchmodify(name) + '=nn.GELU()')
+        # for name, module in self.swin.named_modules():
+        #     if isinstance(module, nn.GELU):
+        #         exec('self.swin.' + torchmodify(name) + '=nn.GELU()')
+        self.vph = VPH()
+        self.swin = SwinTransformerV2(img_size=128, num_heads=[6, 12, 24], depths=[2, 18, 2], embed_dim=192, drop_path=1, drop_path_rate=0.2, pretrained_window_sizes=[8,8,6]).layers
         self.fph = FPH()
         self.decoder = MID(encoder_channels=(96, 192, 384, 768), decoder_channels=decoder_channels)
         self.segmentation_head = SegmentationHead(in_channels=decoder_channels[-1], out_channels=classes, upsampling=2.0)

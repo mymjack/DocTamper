@@ -17,13 +17,6 @@ import torch.nn as nn
 
 Image.MAX_IMAGE_PIXELS = 1000000000000
 
-def squeeze_pred_classes(pred):
-    """
-    Improvised... pred is of shape [1, 2, 512, 512], but label is [1, 1, 512, 512]. Need to match shape
-    eval uses simple argmax... But argmax may lead to weak fine grind training? maybe lets try softmax
-    """
-    return nn.functional.softmax(pred, dim=1)[:,1]
-
 
 # def train_dtd(param, model, train_data_goodq, train_data_fairq, train_data_badq, train_data_all, valid_data, device='cuda'):
 def train_dtd(param, model, train_data_goodq, valid_data, device='cuda'):

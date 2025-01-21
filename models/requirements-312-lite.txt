@@ -1,0 +1,12 @@
+lmdb==1.6.2
+numpy==2.2.1
+Pillow==11.1.0
+tqdm==4.67.1
+opencv-python==4.11.0.86
+efficientnet_pytorch==0.7.1
+timm==0.4.12
+segmentation_models_pytorch==0.2.1
+jpegio==0.2.4
+matplotlib==3.10.0
+torch==2.5.1+cu124
+torchvision==0.20.1+cu124

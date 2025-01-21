@@ -1,3 +1,0 @@
-[2025-01-20 23:41:52,181][train_dtd.py][INFO] Total Epoch:1 Training num:18000 Validation num:18000
-[2025-01-20 23:42:57,299][train_dtd.py][INFO] [train] epoch:0 iter:0/18000 0.00% lr:0.000300 loss:0.934454
-[2025-01-20 23:43:22,023][train_dtd.py][INFO] [train] epoch:0 iter:50/18000 0.28% lr:0.000300 loss:0.941378
